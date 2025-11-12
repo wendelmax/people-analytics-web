@@ -1,0 +1,2 @@
+export { ProjectAllocationCard } from './ProjectAllocationCard';
+

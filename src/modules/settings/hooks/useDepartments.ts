@@ -1,0 +1,2 @@
+export { useDepartments } from '../../../hooks/useDepartments';
+

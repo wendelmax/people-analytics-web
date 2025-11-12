@@ -1,0 +1,2 @@
+export { SimpleChart } from './SimpleChart';
+

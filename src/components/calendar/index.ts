@@ -1,0 +1,2 @@
+export { SimpleCalendar } from './SimpleCalendar';
+
