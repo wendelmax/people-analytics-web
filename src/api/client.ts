@@ -1,8 +1,9 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+// Quando USE_MOCK=true, não precisa de API_URL real pois o interceptor usa mockService diretamente
 const API_URL = USE_MOCK
-  ? (import.meta.env.VITE_MOCK_API_URL || 'http://localhost:3001')
+  ? 'http://localhost:3000' // URL dummy, não será usada quando mock está ativo
   : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
 
 const apiClient: AxiosInstance = axios.create({
@@ -17,8 +18,8 @@ const apiClient: AxiosInstance = axios.create({
 if (USE_MOCK) {
   console.log('🔧 Mock mode enabled - Using mock service');
 
-  // Usar mockService para todas as requisições quando USE_MOCK está ativo
-  const { mockService } = await import('./mockService');
+  // Cache do mockService para evitar múltiplos imports
+  let mockServiceCache: typeof import('./mockService')['mockService'] | null = null;
 
   // Interceptar requisições para usar mock
   apiClient.interceptors.request.use(async (config) => {
@@ -26,7 +27,13 @@ if (USE_MOCK) {
       console.log('🎯 Mock request:', config.method?.toUpperCase(), config.url);
 
       try {
-        const result = await mockService.request({
+        // Carregar mockService dinamicamente apenas quando necessário
+        if (!mockServiceCache) {
+          const module = await import('./mockService');
+          mockServiceCache = module.mockService;
+        }
+
+        const result = await mockServiceCache.request({
           method: config.method?.toUpperCase() as 'GET' | 'POST' | 'PUT' | 'DELETE',
           url: config.url!,
           data: config.data,
