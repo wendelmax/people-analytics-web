@@ -156,16 +156,13 @@ Para fazer login, é necessário que o backend tenha um endpoint `/auth/login` q
 
 ## Deploy
 
-Este projeto possui um workflow automatizado do GitHub Actions para fazer deploy no Vercel.
+Este projeto está configurado para fazer deploy automático no Vercel.
 
 ### Configuração Rápida
 
-1. Configure os secrets no GitHub:
-   - `VERCEL_TOKEN` - Token do Vercel
-   - `VERCEL_ORG_ID` - ID da organização no Vercel
-   - `VERCEL_PROJECT_ID` - ID do projeto no Vercel
-
-2. O deploy acontece automaticamente ao fazer push para `main` ou `master`
+1. Conecte o repositório ao Vercel através do dashboard
+2. O Vercel detectará automaticamente as configurações do `vercel.json`
+3. O deploy acontece automaticamente ao fazer push para `main` ou `master`
 
 Para mais detalhes, consulte o arquivo [DEPLOY.md](./DEPLOY.md)
 

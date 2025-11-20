@@ -1,87 +1,81 @@
 # Guia de Deploy no Vercel
 
-Este projeto possui um workflow automatizado do GitHub Actions para fazer deploy no Vercel.
+Este projeto está configurado para fazer deploy automático no Vercel através da integração com GitHub.
 
 ## Configuração Inicial
 
 ### 1. Criar Projeto no Vercel
 
 1. Acesse [vercel.com](https://vercel.com) e faça login
-2. Crie um novo projeto ou importe este repositório
-3. Anote os seguintes valores:
-   - **Organization ID** (vercel-org-id)
-   - **Project ID** (vercel-project-id)
+2. Clique em **Add New Project**
+3. Importe o repositório do GitHub
+4. O Vercel detectará automaticamente as configurações do projeto através do arquivo `vercel.json`
 
-### 2. Obter Token do Vercel
+### 2. Configuração Automática
 
-1. Acesse [Vercel Settings > Tokens](https://vercel.com/account/tokens)
-2. Crie um novo token com escopo completo
-3. Copie o token gerado
-
-### 3. Configurar Secrets no GitHub
-
-1. Acesse o repositório no GitHub
-2. Vá em **Settings > Secrets and variables > Actions**
-3. Adicione os seguintes secrets:
-
-   - `VERCEL_TOKEN`: Token do Vercel obtido no passo anterior
-   - `VERCEL_ORG_ID`: ID da organização no Vercel
-   - `VERCEL_PROJECT_ID`: ID do projeto no Vercel
-
-### 4. Como Encontrar os IDs
-
-**Organization ID:**
-- Acesse [Vercel Dashboard](https://vercel.com/dashboard)
-- Clique no nome da organização
-- O ID aparece na URL ou nas configurações da organização
-
-**Project ID:**
-- Acesse o projeto no Vercel
-- Vá em **Settings > General**
-- O Project ID aparece na seção "Project ID"
+O projeto já possui um arquivo `vercel.json` configurado que define:
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist` (diretório de saída do Vite)
+- **Framework**: Vite
+- **Rewrites**: Configurado para SPA (Single Page Application) com React Router
+- **Headers**: Cache otimizado para assets estáticos
 
 ## Como Funciona
 
-O workflow está configurado em `.github/workflows/deploy-vercel.yml` e executa:
+O Vercel faz deploy automaticamente quando você faz push para a branch `main` ou `master`:
 
-1. **Checkout do código** - Baixa o código do repositório
-2. **Setup Node.js** - Configura o ambiente Node.js 20
-3. **Instala dependências** - Executa `npm ci`
-4. **Executa linter** - Valida o código (não bloqueia o deploy)
-5. **Executa testes** - Roda os testes (não bloqueia o deploy)
-6. **Build do projeto** - Executa `npm run build`
-7. **Deploy no Vercel** - Faz o deploy usando a action oficial do Vercel
+1. **Detecta mudanças** - O Vercel monitora o repositório conectado
+2. **Instala dependências** - Executa `npm install`
+3. **Executa build** - Roda `npm run build` (definido no `vercel.json`)
+4. **Deploy** - Faz o deploy do diretório `dist` gerado pelo Vite
+5. **Configura rotas** - Aplica os rewrites para funcionar como SPA
 
 ## Triggers
 
-O workflow é executado automaticamente quando:
+O deploy é executado automaticamente quando:
 
 - Há um push para a branch `main` ou `master`
-- Há um pull request para a branch `main` ou `master`
+- Há um merge de pull request para a branch principal
 
 ## Deploy Manual
 
-Se precisar fazer deploy manual, você pode:
+Se precisar fazer deploy manual, você pode usar a CLI do Vercel:
 
-1. Usar a CLI do Vercel:
 ```bash
 npm i -g vercel
 vercel login
 vercel --prod
 ```
 
-2. Ou fazer push para a branch `main`:
+Ou simplesmente fazer push para a branch `main`:
 ```bash
 git push origin main
 ```
 
 ## Variáveis de Ambiente no Vercel
 
-Configure as variáveis de ambiente no Vercel:
+### Frontend
+
+Configure as variáveis de ambiente no projeto do frontend:
 
 1. Acesse o projeto no Vercel
 2. Vá em **Settings > Environment Variables**
-3. Adicione as variáveis necessárias (baseado no `env.example`)
+3. Adicione as variáveis necessárias (baseado no `env.example`):
+   - `VITE_API_URL` - URL da API de produção
+   - `VITE_MOCK_API_URL` - URL do mock-server (se usar)
+   - `VITE_USE_MOCK` - Se deve usar mock (`true` ou `false`)
+   - `VITE_API_TIMEOUT` - Timeout das requisições (padrão: `30000`)
+
+**Para usar mock-server em produção (ex: apresentações):**
+- Veja o guia completo em [MOCK_SERVER_DEPLOY.md](./MOCK_SERVER_DEPLOY.md)
+
+### Mock Server (se deploy separado)
+
+Se você configurou o deploy do mock-server como projeto separado:
+
+1. Acesse o projeto do mock-server no Vercel
+2. Vá em **Settings > Environment Variables**
+3. Configure as variáveis necessárias para o mock-server
 
 ## Troubleshooting
 
@@ -98,7 +92,16 @@ Configure as variáveis de ambiente no Vercel:
 - Certifique-se de que o projeto existe no Vercel
 
 ### Build falha
-- Verifique os logs do workflow no GitHub Actions
+- Verifique os logs do deploy no dashboard do Vercel
 - Teste o build localmente com `npm run build`
 - Verifique se todas as dependências estão no `package.json`
+- Certifique-se de que o arquivo `vercel.json` está na raiz do projeto
+
+### Rotas não funcionam (404)
+- Verifique se o `vercel.json` tem a configuração de rewrites para SPA
+- Certifique-se de que todas as rotas do React Router estão configuradas corretamente
+
+### Assets não carregam
+- Verifique se os caminhos dos assets estão corretos
+- Certifique-se de que o `outputDirectory` no `vercel.json` está como `dist`
 

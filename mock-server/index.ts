@@ -2707,7 +2707,17 @@ app.use((req, res) => {
 
 loadDatabase();
 
-app.listen(PORT, () => {
-  console.log(`🚀 Mock server running on http://localhost:${PORT}`);
-  console.log(`📊 Database: ${DB_PATH}`);
-});
+const isVercel = process.env.VERCEL === '1' || process.env.VERCEL_ENV || process.env.VERCEL_URL;
+
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Mock server running on http://localhost:${PORT}`);
+    console.log(`📊 Database: ${DB_PATH}`);
+  });
+}
+
+const handler = (req: express.Request, res: express.Response) => {
+  return app(req, res);
+};
+
+export default handler;

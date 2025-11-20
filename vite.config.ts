@@ -10,10 +10,18 @@ export default defineConfig({
     },
   },
   define: {
-    'import.meta.env.VITE_USE_MOCK': JSON.stringify('true'),
-    'import.meta.env.VITE_API_URL': JSON.stringify('http://localhost:3000'),
-    'import.meta.env.VITE_MOCK_API_URL': JSON.stringify('http://localhost:3001'),
-    'import.meta.env.VITE_API_TIMEOUT': JSON.stringify('30000'),
+    'import.meta.env.VITE_USE_MOCK': JSON.stringify(process.env.VITE_USE_MOCK || 'true'),
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:3000'),
+    'import.meta.env.VITE_MOCK_API_URL': JSON.stringify(process.env.VITE_MOCK_API_URL || 'http://localhost:3001'),
+    'import.meta.env.VITE_API_TIMEOUT': JSON.stringify(process.env.VITE_API_TIMEOUT || '30000'),
+  },
+  build: {
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return;
+        warn(warning);
+      },
+    },
   },
   server: {
     port: 5173,
